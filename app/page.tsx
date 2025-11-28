@@ -10,6 +10,7 @@ import { LayerManager } from "@/components/layer-manager"
 import { MetadataPreview } from "@/components/metadata-preview"
 import { CanvasPreview, type GeneratedNFT } from "@/components/canvas-preview"
 import { GenerationResults } from "@/components/generation-results"
+import { ExclusionRules, type ExclusionRule } from "@/components/exclusion-rules"
 import { Layers, ImageIcon, FileJson } from "lucide-react"
 
 export default function NFTGenerator() {
@@ -19,6 +20,7 @@ export default function NFTGenerator() {
   const [canvasSize, setCanvasSize] = useState({ width: "500", height: "500" })
   const [generatedResults, setGeneratedResults] = useState<GeneratedNFT[]>([])
   const [collapsedLayers, setCollapsedLayers] = useState<Record<string, boolean>>({})
+  const [exclusionRules, setExclusionRules] = useState<ExclusionRule[]>([])
   const [layers, setLayers] = useState<
     Array<{
       id: string
@@ -180,6 +182,9 @@ export default function NFTGenerator() {
             </CardContent>
           </Card>
 
+          {/* Exclusion Rules section */}
+          <ExclusionRules layers={layers} rules={exclusionRules} onUpdateRules={setExclusionRules} />
+
           {/* Tabs for Layers and Preview */}
           <Tabs defaultValue="layers" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
@@ -245,6 +250,7 @@ export default function NFTGenerator() {
                     totalGeneration={Number.parseInt(totalGeneration) || 100}
                     collectionName={collectionName}
                     collectionDescription={collectionDescription}
+                    exclusionRules={exclusionRules}
                     onGenerate={setGeneratedResults}
                   />
                   {generatedResults.length > 0 && (

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
+import type { ExclusionRule } from "@/components/exclusion-rules"
 
 interface Layer {
   id: string
@@ -26,6 +27,7 @@ interface CanvasPreviewProps {
   totalGeneration: number
   collectionName: string
   collectionDescription: string
+  exclusionRules: ExclusionRule[]
   onGenerate?: (results: GeneratedNFT[]) => void
 }
 
@@ -41,6 +43,7 @@ export function CanvasPreview({
   totalGeneration,
   collectionName,
   collectionDescription,
+  exclusionRules,
   onGenerate,
 }: CanvasPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -65,14 +68,50 @@ export function CanvasPreview({
     return layerImages[0]
   }
 
-  const generateRandomCombination = useCallback(() => {
-    const newSelection = layers.map((layer) => {
-      const selected = selectImageByRarity(layer.images)
-      return selected ? selected.preview : null
-    })
+  const checkExclusionRules = (combination: Array<{ layerId: string; imageId: string }>) => {
+    for (const rule of exclusionRules) {
+      const hasLayerA = combination.find((c) => c.layerId === rule.layerAId && c.imageId === rule.imageAId)
+      const hasLayerB = combination.find((c) => c.layerId === rule.layerBId && c.imageId === rule.imageBId)
 
-    setSelectedImages(newSelection.filter(Boolean) as string[])
-  }, [layers])
+      if (hasLayerA && hasLayerB) {
+        return false // Violates rule
+      }
+    }
+    return true // Valid combination
+  }
+
+  const generateValidCombination = useCallback(() => {
+    const maxRetries = 100
+    let attempts = 0
+
+    while (attempts < maxRetries) {
+      const combination = layers
+        .map((layer) => {
+          const selected = selectImageByRarity(layer.images)
+          return selected ? { layerId: layer.id, imageId: selected.id, preview: selected.preview } : null
+        })
+        .filter(Boolean) as Array<{ layerId: string; imageId: string; preview: string }>
+
+      if (checkExclusionRules(combination)) {
+        return combination
+      }
+
+      attempts++
+    }
+
+    // If we can't find a valid combination after max retries, return any combination
+    return layers
+      .map((layer) => {
+        const selected = selectImageByRarity(layer.images)
+        return selected ? { layerId: layer.id, imageId: selected.id, preview: selected.preview } : null
+      })
+      .filter(Boolean) as Array<{ layerId: string; imageId: string; preview: string }>
+  }, [layers, exclusionRules])
+
+  const generateRandomCombination = useCallback(() => {
+    const combination = generateValidCombination()
+    setSelectedImages(combination.map((c) => c.preview))
+  }, [generateValidCombination])
 
   useEffect(() => {
     if (layers.length > 0 && !hasGeneratedInitial) {
@@ -125,12 +164,7 @@ export function CanvasPreview({
     const results: GeneratedNFT[] = []
 
     for (let i = 1; i <= totalGeneration; i++) {
-      const combination = layers
-        .map((layer) => {
-          const selected = selectImageByRarity(layer.images)
-          return selected ? { preview: selected.preview, name: selected.name } : null
-        })
-        .filter(Boolean)
+      const combination = generateValidCombination()
 
       const tempCanvas = document.createElement("canvas")
       tempCanvas.width = canvasSize.width
@@ -153,14 +187,18 @@ export function CanvasPreview({
               resolve()
             }
             img.onerror = () => resolve()
-            img.src = item!.preview
+            img.src = item.preview
           })
         }
 
-        const attributes = combination.map((item, idx) => ({
-          trait_type: layers[idx].name,
-          value: item!.name,
-        }))
+        const attributes = combination.map((item, idx) => {
+          const layer = layers[idx]
+          const image = layer.images.find((img) => img.id === item.imageId)
+          return {
+            trait_type: layer.name,
+            value: image?.name || "",
+          }
+        })
 
         const metadata = {
           name: `${collectionName} #${i}`,
