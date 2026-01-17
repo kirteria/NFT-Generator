@@ -203,7 +203,7 @@ export function CanvasPreview({
         const metadata = {
           name: `${collectionName} #${i}`,
           description: collectionDescription,
-          image: `ipfs://NEW_HASH_HERE/${i}.png`,
+          image: `https://gateway.lighthouse.storage/ipfs/NEW_HASH_HERE/${i}.png`,
           attributes,
         }
 
