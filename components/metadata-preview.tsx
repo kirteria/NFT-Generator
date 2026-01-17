@@ -49,7 +49,7 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
 
     const updated = generatedResults.map((result, index) => ({
       ...result.metadata,
-      image: `ipfs://${cid}/${index + 1}.png`,
+      image: `https://gateway.lighthouse.storage/ipfs/YOUR_CID_HERE/${i}.png`,
     }))
 
     setUpdatedMetadata(updated)
