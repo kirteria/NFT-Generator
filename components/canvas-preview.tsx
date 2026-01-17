@@ -204,10 +204,7 @@ export function CanvasPreview({
           name: `${collectionName} #${i}`,
           description: collectionDescription,
           image: `ipfs://NEW_HASH_HERE/${i}.png`,
-          edition: i,
-          date: Date.now(),
           attributes,
-          compiler: "Skullines",
         }
 
         results.push({
