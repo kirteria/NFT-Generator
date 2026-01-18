@@ -20,6 +20,8 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
   const [cid, setCid] = useState("")
   const [isCidUpdated, setIsCidUpdated] = useState(false)
   const [updatedMetadata, setUpdatedMetadata] = useState<any[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processProgress, setProcessProgress] = useState(0)
 
   if (!generatedResults || generatedResults.length === 0) {
     return (
@@ -44,16 +46,25 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
     }
   }
 
-  const handleSubmitCid = () => {
+  const handleSubmitCid = async () => {
     if (!cid.trim()) return
 
-    const updated = generatedResults.map((result, index) => ({
-      ...result.metadata,
-      image: `https://gateway.lighthouse.storage/ipfs/${cid}/${index + 1}.png`,
-    }))
+    setIsProcessing(true)
+    setProcessProgress(0)
+
+    const updated: any[] = []
+    for (let i = 0; i < generatedResults.length; i++) {
+      updated.push({
+        ...generatedResults[i].metadata,
+        image: `https://gateway.lighthouse.storage/ipfs/${cid}/${i + 1}.png`,
+      })
+      setProcessProgress(i + 1)
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
 
     setUpdatedMetadata(updated)
     setIsCidUpdated(true)
+    setIsProcessing(false)
   }
 
   const handleDownloadMetadata = async () => {
@@ -117,8 +128,18 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleSubmitCid} className="flex-1" disabled={!cid.trim()}>
-            Submit CID
+          <Button 
+            onClick={handleSubmitCid} 
+            className="flex-1" 
+            disabled={!cid.trim() || isProcessing}
+          >
+            {isProcessing ? (
+              <span>
+                {processProgress}/{generatedResults.length}
+              </span>
+            ) : (
+              "Submit CID"
+            )}
           </Button>
           <Button
             onClick={handleDownloadMetadata}
