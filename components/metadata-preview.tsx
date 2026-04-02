@@ -52,10 +52,9 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
 
     const updated: any[] = []
     for (let i = 0; i < generatedResults.length; i++) {
-      updated.push({
-        ...generatedResults[i].metadata,
-        image: `https://gateway.lighthouse.storage/ipfs/${cid}/${i + 1}.png`,
-      })
+      const meta = { ...generatedResults[i].metadata }
+      meta.image = `https://gateway.lighthouse.storage/ipfs/${cid}/${i + 1}.png`
+      updated.push(meta)
       setProcessProgress(i + 1)
       await new Promise((resolve) => setTimeout(resolve, 10))
     }
