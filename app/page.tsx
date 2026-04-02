@@ -148,7 +148,6 @@ export default function NFTGenerator() {
                   onChange={(e) => setNftName(e.target.value)}
                   className="border-2"
                 />
-                <p className="text-xs text-muted-foreground">Each NFT will be named like: Cat #1, Cat #2, etc.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -176,12 +175,11 @@ export default function NFTGenerator() {
                     <Label htmlFor="collection-id">Collection ID</Label>
                     <Input
                       id="collection-id"
-                      placeholder="019d2026-7873-7e4d-92df-0f7297a50676"
+                      placeholder="Generate UUID at uuidgenerator.net/version7"
                       value={collectionId}
                       onChange={(e) => setCollectionId(e.target.value)}
                       className="border-2"
                     />
-                    <p className="text-xs text-muted-foreground">Generate UUID at uuidgenerator.net/version7</p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="icon">Icon URL</Label>
@@ -249,11 +247,6 @@ export default function NFTGenerator() {
                   <option value="lighthouse">Lighthouse</option>
                   <option value="pinata">Pinata</option>
                 </select>
-                <p className="text-xs text-muted-foreground">
-                  {storageProvider === "lighthouse" 
-                    ? "gateway.lighthouse.storage" 
-                    : "gateway.pinata.cloud"}
-                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="total">Total Generation</Label>
