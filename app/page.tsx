@@ -202,7 +202,7 @@ export default function NFTGenerator() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="twitter">Twitter/X URL</Label>
+                    <Label htmlFor="twitter">Twitter/X Username</Label>
                     <Input
                       id="twitter"
                       placeholder="@username"
