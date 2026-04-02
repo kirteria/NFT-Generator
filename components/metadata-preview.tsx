@@ -15,9 +15,10 @@ interface GeneratedNFT {
 
 interface MetadataPreviewProps {
   generatedResults: GeneratedNFT[]
+  storageProvider: "lighthouse" | "pinata"
 }
 
-export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
+export function MetadataPreview({ generatedResults, storageProvider }: MetadataPreviewProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [cid, setCid] = useState("")
   const [isCidUpdated, setIsCidUpdated] = useState(false)
@@ -50,10 +51,14 @@ export function MetadataPreview({ generatedResults }: MetadataPreviewProps) {
     setIsProcessing(true)
     setProcessProgress(0)
 
+    const gatewayUrl = storageProvider === "pinata" 
+      ? "https://gateway.pinata.cloud/ipfs" 
+      : "https://gateway.lighthouse.storage/ipfs"
+
     const updated: any[] = []
     for (let i = 0; i < generatedResults.length; i++) {
       const meta = { ...generatedResults[i].metadata }
-      meta.image = `https://gateway.lighthouse.storage/ipfs/${cid}/${i + 1}.png`
+      meta.image = `${gatewayUrl}/${cid}/${i + 1}.png`
       updated.push(meta)
       setProcessProgress(i + 1)
       await new Promise((resolve) => setTimeout(resolve, 10))
