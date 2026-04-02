@@ -115,7 +115,7 @@ export function GenerationResults({
 
   const downloadAllImages = async () => {
     const zip = new JSZip()
-    const imageFolder = zip.folder("image")
+    const imageFolder = zip.folder("images")
 
     if (!imageFolder) return
 
