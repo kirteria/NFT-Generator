@@ -24,6 +24,7 @@ export default function NFTGenerator() {
   const [twitter, setTwitter] = useState("")
   const [website, setWebsite] = useState("")
   const [sensitiveContent, setSensitiveContent] = useState(false)
+  const [storageProvider, setStorageProvider] = useState<"lighthouse" | "pinata">("lighthouse")
   const [totalGeneration, setTotalGeneration] = useState("100")
   const [canvasSize, setCanvasSize] = useState({ width: "500", height: "500" })
   const [generatedResults, setGeneratedResults] = useState<GeneratedNFT[]>([])
@@ -238,6 +239,23 @@ export default function NFTGenerator() {
               )}
 
               <div className="space-y-2">
+                <Label htmlFor="storage">Storage Provider</Label>
+                <select
+                  id="storage"
+                  value={storageProvider}
+                  onChange={(e) => setStorageProvider(e.target.value as "lighthouse" | "pinata")}
+                  className="w-full h-10 px-3 rounded-md border-2 bg-background"
+                >
+                  <option value="lighthouse">Lighthouse</option>
+                  <option value="pinata">Pinata</option>
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  {storageProvider === "lighthouse" 
+                    ? "gateway.lighthouse.storage" 
+                    : "gateway.pinata.cloud"}
+                </p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="total">Total Generation</Label>
                 <Input
                   id="total"
@@ -358,6 +376,7 @@ export default function NFTGenerator() {
                     twitter={twitter}
                     website={website}
                     sensitiveContent={sensitiveContent}
+                    storageProvider={storageProvider}
                     exclusionRules={exclusionRules}
                     onGenerate={setGeneratedResults}
                   />
@@ -386,7 +405,7 @@ export default function NFTGenerator() {
                   <CardDescription>Metadata for your generated NFT collection</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <MetadataPreview generatedResults={generatedResults} />
+                  <MetadataPreview generatedResults={generatedResults} storageProvider={storageProvider} />
                 </CardContent>
               </Card>
             </TabsContent>
