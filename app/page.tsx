@@ -205,7 +205,7 @@ export default function NFTGenerator() {
                     <Label htmlFor="twitter">Twitter/X URL</Label>
                     <Input
                       id="twitter"
-                      placeholder="https://x.com/yourproject"
+                      placeholder="@username"
                       value={twitter}
                       onChange={(e) => setTwitter(e.target.value)}
                       className="border-2"
