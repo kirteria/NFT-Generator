@@ -90,7 +90,7 @@ export default function NFTGenerator() {
 
     return {
       name: `${collectionName} #${edition}`,
-      description: collectionDescription,
+      description: description,
       image: `ipfs://NEW_HASH_HERE/${edition}.png`,
       edition,
       date: Date.now(),
@@ -371,7 +371,7 @@ export default function NFTGenerator() {
                           height: Number.parseInt(canvasSize.height) || 500,
                         }}
                         collectionName={collectionName}
-                        collectionDescription={collectionDescription}
+                        collectionDescription={description}
                       />
                     </div>
                   )}
