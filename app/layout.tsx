@@ -10,7 +10,7 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "NFT Generator - Create Your Collection",
   description: "Generate NFT collections with custom layers, rarity settings, and metadata",
-  generator: "v0.app",
+  generator: "vercel",
   icons: {
     icon: [
       {
@@ -22,8 +22,8 @@ export const metadata: Metadata = {
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/icon.png",
+        type: "image/x",
       },
     ],
     apple: "/apple-icon.png",
