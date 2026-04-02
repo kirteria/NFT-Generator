@@ -34,7 +34,6 @@ interface CanvasPreviewProps {
   twitter: string
   website: string
   sensitiveContent: boolean
-  mintingTool: string
   exclusionRules: ExclusionRule[]
   onGenerate?: (results: GeneratedNFT[]) => void
 }
@@ -58,7 +57,6 @@ export function CanvasPreview({
   twitter,
   website,
   sensitiveContent,
-  mintingTool,
   exclusionRules,
   onGenerate,
 }: CanvasPreviewProps) {
@@ -226,7 +224,6 @@ export function CanvasPreview({
 
         const metadata = {
           format: "CHIP-0007",
-          minting_tool: mintingTool || "NFT Generator",
           sensitive_content: sensitiveContent,
           name: `${nftName} #${i}`,
           description: description,

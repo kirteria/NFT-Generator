@@ -23,7 +23,6 @@ export default function NFTGenerator() {
   const [twitter, setTwitter] = useState("")
   const [website, setWebsite] = useState("")
   const [sensitiveContent, setSensitiveContent] = useState(false)
-  const [mintingTool, setMintingTool] = useState("")
   const [totalGeneration, setTotalGeneration] = useState("100")
   const [canvasSize, setCanvasSize] = useState({ width: "500", height: "500" })
   const [generatedResults, setGeneratedResults] = useState<GeneratedNFT[]>([])
@@ -219,16 +218,7 @@ export default function NFTGenerator() {
                   <option value="true">True</option>
                 </select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="minting-tool">Minting Tool</Label>
-                <Input
-                  id="minting-tool"
-                  placeholder="Your Minting Tool Name"
-                  value={mintingTool}
-                  onChange={(e) => setMintingTool(e.target.value)}
-                  className="border-2"
-                />
-              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="total">Total Generation</Label>
                 <Input
@@ -349,7 +339,6 @@ export default function NFTGenerator() {
                     twitter={twitter}
                     website={website}
                     sensitiveContent={sensitiveContent}
-                    mintingTool={mintingTool}
                     exclusionRules={exclusionRules}
                     onGenerate={setGeneratedResults}
                   />
