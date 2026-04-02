@@ -14,8 +14,16 @@ import { ExclusionRules, type ExclusionRule } from "@/components/exclusion-rules
 import { Layers, ImageIcon, FileJson } from "lucide-react"
 
 export default function NFTGenerator() {
+  const [metadataMode, setMetadataMode] = useState<"chia" | "evm">("chia")
+  const [nftName, setNftName] = useState("")
+  const [description, setDescription] = useState("")
   const [collectionName, setCollectionName] = useState("")
-  const [collectionDescription, setCollectionDescription] = useState("")
+  const [collectionId, setCollectionId] = useState("")
+  const [icon, setIcon] = useState("")
+  const [banner, setBanner] = useState("")
+  const [twitter, setTwitter] = useState("")
+  const [website, setWebsite] = useState("")
+  const [sensitiveContent, setSensitiveContent] = useState(false)
   const [totalGeneration, setTotalGeneration] = useState("100")
   const [canvasSize, setCanvasSize] = useState({ width: "500", height: "500" })
   const [generatedResults, setGeneratedResults] = useState<GeneratedNFT[]>([])
@@ -102,7 +110,20 @@ export default function NFTGenerator() {
     <div className="min-h-screen bg-background">
       <div className="container max-w-6xl mx-auto px-4 py-6 md:py-8">
         <div className="mb-6 md:mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-balance mb-2">NFT Generator</h1>
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold text-balance">NFT Generator</h1>
+            <button
+              onClick={() => setMetadataMode(metadataMode === "chia" ? "evm" : "chia")}
+              className="px-4 py-2 rounded-lg font-semibold text-sm transition-all border-2 hover:scale-105"
+              style={{
+                backgroundColor: metadataMode === "chia" ? "#3AAF85" : "#627EEA",
+                color: "white",
+                borderColor: metadataMode === "chia" ? "#2D8A6A" : "#4A5FC1",
+              }}
+            >
+              {metadataMode === "chia" ? "Chia" : "EVM"}
+            </button>
+          </div>
           <p className="text-muted-foreground">Create your NFT collection with custom layers and rarity settings</p>
         </div>
 
@@ -118,25 +139,104 @@ export default function NFTGenerator() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Collection Name</Label>
+                <Label htmlFor="nft-name">NFT Name</Label>
                 <Input
-                  id="name"
-                  placeholder="My NFT Collection"
-                  value={collectionName}
-                  onChange={(e) => setCollectionName(e.target.value)}
+                  id="nft-name"
+                  placeholder="Cat"
+                  value={nftName}
+                  onChange={(e) => setNftName(e.target.value)}
                   className="border-2"
                 />
+                <p className="text-xs text-muted-foreground">Each NFT will be named like: Cat #1, Cat #2, etc.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Input
                   id="description"
-                  placeholder="A unique NFT collection"
-                  value={collectionDescription}
-                  onChange={(e) => setCollectionDescription(e.target.value)}
+                  placeholder="A unique NFT collection description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   className="border-2"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="collection-name">Collection Name</Label>
+                <Input
+                  id="collection-name"
+                  placeholder="My Awesome Collection"
+                  value={collectionName}
+                  onChange={(e) => setCollectionName(e.target.value)}
+                  className="border-2"
+                />
+              </div>
+              {metadataMode === "chia" && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="collection-id">Collection ID</Label>
+                    <Input
+                      id="collection-id"
+                      placeholder="019d2026-7873-7e4d-92df-0f7297a50676"
+                      value={collectionId}
+                      onChange={(e) => setCollectionId(e.target.value)}
+                      className="border-2"
+                    />
+                    <p className="text-xs text-muted-foreground">Generate UUID at uuidgenerator.net/version7</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="icon">Icon URL</Label>
+                    <Input
+                      id="icon"
+                      placeholder="https://example.com/icon.png"
+                      value={icon}
+                      onChange={(e) => setIcon(e.target.value)}
+                      className="border-2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="banner">Banner URL</Label>
+                    <Input
+                      id="banner"
+                      placeholder="https://example.com/banner.png"
+                      value={banner}
+                      onChange={(e) => setBanner(e.target.value)}
+                      className="border-2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter">Twitter/X URL</Label>
+                    <Input
+                      id="twitter"
+                      placeholder="https://x.com/yourproject"
+                      value={twitter}
+                      onChange={(e) => setTwitter(e.target.value)}
+                      className="border-2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website URL</Label>
+                    <Input
+                      id="website"
+                      placeholder="https://yourproject.com"
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      className="border-2"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="sensitive">Sensitive Content</Label>
+                    <select
+                      id="sensitive"
+                      value={sensitiveContent ? "true" : "false"}
+                      onChange={(e) => setSensitiveContent(e.target.value === "true")}
+                      className="w-full h-10 px-3 rounded-md border-2 bg-background"
+                    >
+                      <option value="false">False</option>
+                      <option value="true">True</option>
+                    </select>
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="total">Total Generation</Label>
                 <Input
@@ -248,8 +348,16 @@ export default function NFTGenerator() {
                       height: Number.parseInt(canvasSize.height) || 500,
                     }}
                     totalGeneration={Number.parseInt(totalGeneration) || 100}
+                    metadataMode={metadataMode}
+                    nftName={nftName}
+                    description={description}
                     collectionName={collectionName}
-                    collectionDescription={collectionDescription}
+                    collectionId={collectionId}
+                    icon={icon}
+                    banner={banner}
+                    twitter={twitter}
+                    website={website}
+                    sensitiveContent={sensitiveContent}
                     exclusionRules={exclusionRules}
                     onGenerate={setGeneratedResults}
                   />

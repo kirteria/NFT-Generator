@@ -25,8 +25,16 @@ interface CanvasPreviewProps {
   layers: Layer[]
   canvasSize: { width: number; height: number }
   totalGeneration: number
+  metadataMode: "chia" | "evm"
+  nftName: string
+  description: string
   collectionName: string
-  collectionDescription: string
+  collectionId: string
+  icon: string
+  banner: string
+  twitter: string
+  website: string
+  sensitiveContent: boolean
   exclusionRules: ExclusionRule[]
   onGenerate?: (results: GeneratedNFT[]) => void
 }
@@ -41,8 +49,16 @@ export function CanvasPreview({
   layers,
   canvasSize,
   totalGeneration,
+  metadataMode,
+  nftName,
+  description,
   collectionName,
-  collectionDescription,
+  collectionId,
+  icon,
+  banner,
+  twitter,
+  website,
+  sensitiveContent,
   exclusionRules,
   onGenerate,
 }: CanvasPreviewProps) {
@@ -200,11 +216,39 @@ export function CanvasPreview({
           }
         })
 
-        const metadata = {
-          name: `${collectionName} #${i}`,
-          description: collectionDescription,
-          image: `https://gateway.lighthouse.storage/ipfs/NEW_HASH_HERE/${i}.png`,
-          attributes,
+        let metadata: any
+
+        if (metadataMode === "chia") {
+          // CHIP-0007 format for Chia
+          const collectionAttributes: Array<{ type: string; value: string }> = [
+            { type: "description", value: description },
+          ]
+          if (icon) collectionAttributes.push({ type: "icon", value: icon })
+          if (banner) collectionAttributes.push({ type: "banner", value: banner })
+          if (twitter) collectionAttributes.push({ type: "twitter", value: twitter })
+          if (website) collectionAttributes.push({ type: "website", value: website })
+
+          metadata = {
+            format: "CHIP-0007",
+            sensitive_content: sensitiveContent,
+            name: `${nftName} #${i}`,
+            description: description,
+            image: `https://gateway.lighthouse.storage/ipfs/NEW_HASH_HERE/${i}.png`,
+            attributes,
+            collection: {
+              name: collectionName,
+              id: collectionId,
+              attributes: collectionAttributes,
+            },
+          }
+        } else {
+          // ERC721 format for EVM
+          metadata = {
+            name: `${nftName} #${i}`,
+            description: description,
+            image: `https://gateway.lighthouse.storage/ipfs/NEW_HASH_HERE/${i}.png`,
+            attributes,
+          }
         }
 
         results.push({
