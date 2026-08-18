@@ -15,7 +15,7 @@ interface GeneratedNFT {
 
 interface MetadataPreviewProps {
   generatedResults: GeneratedNFT[]
-  storageProvider: "lighthouse" | "pinata"
+  storageProvider: "lighthouse" | "pinata" | "none"
 }
 
 export function MetadataPreview({ generatedResults, storageProvider }: MetadataPreviewProps) {
@@ -51,14 +51,17 @@ export function MetadataPreview({ generatedResults, storageProvider }: MetadataP
     setIsProcessing(true)
     setProcessProgress(0)
 
-    const gatewayUrl = storageProvider === "pinata" 
-      ? "https://gateway.pinata.cloud/ipfs" 
-      : "https://gateway.lighthouse.storage/ipfs"
+    const gatewayUrl = storageProvider === "pinata"
+      ? "https://gateway.pinata.cloud/ipfs"
+      : storageProvider === "lighthouse"
+        ? "https://gateway.lighthouse.storage/ipfs"
+        : null
+    const imageBaseUrl = gatewayUrl ? `${gatewayUrl}/${cid}` : cid.trim()
 
     const updated: any[] = []
     for (let i = 0; i < generatedResults.length; i++) {
       const meta = { ...generatedResults[i].metadata }
-      meta.image = `${gatewayUrl}/${cid}/${i + 1}.png`
+      meta.image = `${imageBaseUrl}/${i + 1}.png`
       updated.push(meta)
       setProcessProgress(i + 1)
       await new Promise((resolve) => setTimeout(resolve, 10))
@@ -70,12 +73,15 @@ export function MetadataPreview({ generatedResults, storageProvider }: MetadataP
   }
 
   const handleDownloadMetadata = async () => {
-    if (!isCidUpdated) return
+    if (!isCidUpdated && storageProvider !== "none") return
 
     const JSZip = (await import("jszip")).default
     const zip = new JSZip()
+    const metadataToDownload = isCidUpdated
+      ? updatedMetadata
+      : generatedResults.map((result) => result.metadata)
 
-    updatedMetadata.forEach((meta, index) => {
+    metadataToDownload.forEach((meta, index) => {
       const fileName = `${index + 1}.json`
       zip.file(fileName, JSON.stringify(meta, null, 2))
     })
@@ -248,8 +254,8 @@ export function MetadataPreview({ generatedResults, storageProvider }: MetadataP
                 onClick={handleDownloadMetadata}
                 variant="outline"
                 className="flex-1 bg-transparent"
-                disabled={!isCidUpdated}
-              >
+disabled={!isCidUpdated && storageProvider !== "none"}
+          >
                 <Download className="w-4 h-4 mr-2" />
                 Download
               </Button>
