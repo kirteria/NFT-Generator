@@ -46,7 +46,7 @@ export function MetadataPreview({ generatedResults, storageProvider }: MetadataP
   }
 
   const handleSubmitCid = async () => {
-    if (storageProvider === "none" || !cid.trim()) return
+    if (!cid.trim()) return
 
     setIsProcessing(true)
     setProcessProgress(0)
@@ -56,13 +56,12 @@ export function MetadataPreview({ generatedResults, storageProvider }: MetadataP
       : storageProvider === "lighthouse"
         ? "https://gateway.lighthouse.storage/ipfs"
         : null
+    const imageBaseUrl = gatewayUrl ? `${gatewayUrl}/${cid}` : cid.trim()
 
     const updated: any[] = []
     for (let i = 0; i < generatedResults.length; i++) {
       const meta = { ...generatedResults[i].metadata }
-      if (gatewayUrl) {
-        meta.image = `${gatewayUrl}/${cid}/${i + 1}.png`
-      }
+      meta.image = `${imageBaseUrl}/${i + 1}.png`
       updated.push(meta)
       setProcessProgress(i + 1)
       await new Promise((resolve) => setTimeout(resolve, 10))

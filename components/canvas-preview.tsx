@@ -225,7 +225,11 @@ export function CanvasPreview({
           : storageProvider === "lighthouse"
             ? "https://gateway.lighthouse.storage/ipfs"
             : null
-        const imageMetadata = gatewayUrl ? { image: `${gatewayUrl}/NEW_HASH_HERE/${i}.png` } : {}
+        const imageMetadata = {
+          image: gatewayUrl
+            ? `${gatewayUrl}/NEW_HASH_HERE/${i + 1}.png`
+            : `blank_${i + 1}.png`,
+        }
 
         if (metadataMode === "chia") {
           // CHIP-0007 format for Chia
