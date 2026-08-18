@@ -24,7 +24,7 @@ export default function NFTGenerator() {
   const [twitter, setTwitter] = useState("")
   const [website, setWebsite] = useState("")
   const [sensitiveContent, setSensitiveContent] = useState(false)
-  const [storageProvider, setStorageProvider] = useState<"lighthouse" | "pinata">("lighthouse")
+  const [storageProvider, setStorageProvider] = useState<"lighthouse" | "pinata" | "none">("lighthouse")
   const [totalGeneration, setTotalGeneration] = useState("100")
   const [canvasSize, setCanvasSize] = useState({ width: "500", height: "500" })
   const [generatedResults, setGeneratedResults] = useState<GeneratedNFT[]>([])
@@ -114,7 +114,13 @@ export default function NFTGenerator() {
           <div className="flex items-center justify-between gap-4 mb-2">
             <h1 className="text-3xl md:text-4xl font-bold text-balance">NFT Generator</h1>
             <button
-              onClick={() => setMetadataMode(metadataMode === "chia" ? "evm" : "chia")}
+              onClick={() => {
+                const nextMode = metadataMode === "chia" ? "evm" : "chia"
+                setMetadataMode(nextMode)
+                if (nextMode === "chia" && storageProvider === "none") {
+                  setStorageProvider("lighthouse")
+                }
+              }}
               className="px-4 py-2 rounded-lg font-semibold text-sm transition-all border-2 hover:scale-105"
               style={{
                 backgroundColor: metadataMode === "chia" ? "#3AAF85" : "#627EEA",
@@ -241,11 +247,12 @@ export default function NFTGenerator() {
                 <select
                   id="storage"
                   value={storageProvider}
-                  onChange={(e) => setStorageProvider(e.target.value as "lighthouse" | "pinata")}
+                  onChange={(e) => setStorageProvider(e.target.value as "lighthouse" | "pinata" | "none")}
                   className="w-full h-10 px-3 rounded-md border-2 bg-background"
                 >
                   <option value="lighthouse">Lighthouse</option>
                   <option value="pinata">Pinata</option>
+                  {metadataMode === "evm" && <option value="none">None (manual image URL)</option>}
                 </select>
               </div>
               <div className="space-y-2">

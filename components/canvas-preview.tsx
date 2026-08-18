@@ -35,7 +35,7 @@ interface CanvasPreviewProps {
   twitter: string
   website: string
   sensitiveContent: boolean
-  storageProvider: "lighthouse" | "pinata"
+  storageProvider: "lighthouse" | "pinata" | "none"
   exclusionRules: ExclusionRule[]
   onGenerate?: (results: GeneratedNFT[]) => void
 }
@@ -220,9 +220,12 @@ export function CanvasPreview({
 
         let metadata: any
 
-        const gatewayUrl = storageProvider === "pinata" 
-          ? "https://gateway.pinata.cloud/ipfs" 
-          : "https://gateway.lighthouse.storage/ipfs"
+        const gatewayUrl = storageProvider === "pinata"
+          ? "https://gateway.pinata.cloud/ipfs"
+          : storageProvider === "lighthouse"
+            ? "https://gateway.lighthouse.storage/ipfs"
+            : null
+        const imageMetadata = gatewayUrl ? { image: `${gatewayUrl}/NEW_HASH_HERE/${i}.png` } : {}
 
         if (metadataMode === "chia") {
           // CHIP-0007 format for Chia
@@ -239,7 +242,7 @@ export function CanvasPreview({
             sensitive_content: sensitiveContent,
             name: `${nftName} #${i}`,
             description: description,
-            image: `${gatewayUrl}/NEW_HASH_HERE/${i}.png`,
+            ...imageMetadata,
             attributes,
             collection: {
               name: collectionName,
@@ -252,7 +255,7 @@ export function CanvasPreview({
           metadata = {
             name: `${nftName} #${i}`,
             description: description,
-            image: `${gatewayUrl}/NEW_HASH_HERE/${i}.png`,
+            ...imageMetadata,
             attributes,
           }
         }
