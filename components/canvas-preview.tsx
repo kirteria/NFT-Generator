@@ -61,7 +61,7 @@ async function fileToArrayBuffer(file: File) {
 
 async function decodeLayerFrames(image: Layer["images"][number], width: number, height: number) {
   if (image.file.type !== "image/gif") {
-    return [{ canvas: await imageToCanvas(image.preview, width, height), delay: 100 }]
+    return [{ canvas: await imageToCanvas(image.preview, width, height), delay: 1000 }]
   }
 
   const parsedGif = parseGIF(await fileToArrayBuffer(image.file))
@@ -89,7 +89,7 @@ async function decodeLayerFrames(image: Layer["images"][number], width: number, 
         (frame.dims.height / sourceHeight) * height,
       )
     }
-    return { canvas: frameCanvas, delay: Math.max(frame.delay || 100, 20) }
+    return { canvas: frameCanvas, delay: frame.delay || 100 }
   })
 }
 
@@ -133,7 +133,7 @@ async function composeGifDataUrl(
     if (!context) continue
     context.fillStyle = "#6A3CFF"
     context.fillRect(0, 0, width, height)
-    let delay = 100
+    let delay = 0
 
     decodedLayers.forEach((frames) => {
       const frame = frames[frameIndex % frames.length]
