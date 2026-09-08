@@ -61,7 +61,7 @@ async function fileToArrayBuffer(file: File) {
 
 async function decodeLayerFrames(image: Layer["images"][number], width: number, height: number) {
   if (image.file.type !== "image/gif") {
-    return [{ canvas: await imageToCanvas(image.preview, width, height), delay: 1000 }]
+    return [{ canvas: await imageToCanvas(image.preview, width, height), delay: 1 }]
   }
 
   const parsedGif = parseGIF(await fileToArrayBuffer(image.file))
@@ -73,7 +73,7 @@ async function decodeLayerFrames(image: Layer["images"][number], width: number, 
     frameCanvas.width = width
     frameCanvas.height = height
     const frameContext = frameCanvas.getContext("2d")
-    if (!frameContext) return { canvas: frameCanvas, delay: (frame.delay || 10) * 10 }
+    if (!frameContext) return { canvas: frameCanvas, delay: Math.max(frame.delay || 1, 1) }
 
     const patchCanvas = document.createElement("canvas")
     patchCanvas.width = frame.dims.width
@@ -89,7 +89,7 @@ async function decodeLayerFrames(image: Layer["images"][number], width: number, 
         (frame.dims.height / sourceHeight) * height,
       )
     }
-    return { canvas: frameCanvas, delay: (frame.delay || 10) * 10 }
+    return { canvas: frameCanvas, delay: Math.max(frame.delay || 1, 1) }
   })
 }
 
