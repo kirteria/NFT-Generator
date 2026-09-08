@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
+import { GIFEncoder, quantize, applyPalette } from "gifenc"
 import type { ExclusionRule } from "@/components/exclusion-rules"
 
 interface Layer {
@@ -44,6 +45,23 @@ export interface GeneratedNFT {
   id: number
   dataUrl: string
   metadata: any
+  format: "png" | "gif"
+}
+
+function canvasToGifDataUrl(canvas: HTMLCanvasElement) {
+  const imageData = canvas.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height)
+  if (!imageData) return canvas.toDataURL("image/png", 1.0)
+
+  const palette = quantize(imageData.data, 256)
+  const indexed = applyPalette(imageData.data, palette)
+  const encoder = GIFEncoder()
+  encoder.writeFrame(indexed, canvas.width, canvas.height, { palette, delay: 100 })
+  encoder.finish()
+
+  const bytes = encoder.bytes()
+  let binary = ""
+  for (let index = 0; index < bytes.length; index += 1) binary += String.fromCharCode(bytes[index])
+  return `data:image/gif;base64,${btoa(binary)}`
 }
 
 export function CanvasPreview({
@@ -183,6 +201,10 @@ export function CanvasPreview({
 
     for (let i = 1; i <= totalGeneration; i++) {
       const combination = generateValidCombination()
+      const outputFormat = combination.some((item) => {
+        const layer = layers.find((candidate) => candidate.id === item.layerId)
+        return layer?.images.find((image: { id: string; file: File }) => image.id === item.imageId)?.file.type === "image/gif"
+      }) ? "gif" : "png"
 
       const tempCanvas = document.createElement("canvas")
       tempCanvas.width = canvasSize.width
@@ -266,8 +288,9 @@ export function CanvasPreview({
 
         results.push({
           id: i,
-          dataUrl: tempCanvas.toDataURL("image/png", 1.0),
+          dataUrl: outputFormat === "gif" ? canvasToGifDataUrl(tempCanvas) : tempCanvas.toDataURL("image/png", 1.0),
           metadata,
+          format: outputFormat,
         })
       }
     }
