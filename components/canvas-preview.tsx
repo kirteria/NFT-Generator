@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { GIFEncoder, quantize, applyPalette } from "gifenc"
+import { decompressFrames, parseGIF } from "gifuct-js"
 import type { ExclusionRule } from "@/components/exclusion-rules"
 
 interface Layer {
@@ -48,20 +49,107 @@ export interface GeneratedNFT {
   format: "png" | "gif"
 }
 
-function canvasToGifDataUrl(canvas: HTMLCanvasElement) {
-  const imageData = canvas.getContext("2d")?.getImageData(0, 0, canvas.width, canvas.height)
-  if (!imageData) return canvas.toDataURL("image/png", 1.0)
-
-  const palette = quantize(imageData.data, 256)
-  const indexed = applyPalette(imageData.data, palette)
-  const encoder = GIFEncoder()
-  encoder.writeFrame(indexed, canvas.width, canvas.height, { palette, delay: 100 })
-  encoder.finish()
-
-  const bytes = encoder.bytes()
+function gifBytesToDataUrl(bytes: Uint8Array) {
   let binary = ""
   for (let index = 0; index < bytes.length; index += 1) binary += String.fromCharCode(bytes[index])
   return `data:image/gif;base64,${btoa(binary)}`
+}
+
+async function fileToArrayBuffer(file: File) {
+  return file.arrayBuffer()
+}
+
+async function decodeLayerFrames(image: Layer["images"][number], width: number, height: number) {
+  if (image.file.type !== "image/gif") {
+    return [{ canvas: await imageToCanvas(image.preview, width, height), delay: 100 }]
+  }
+
+  const parsedGif = parseGIF(await fileToArrayBuffer(image.file))
+  const sourceWidth = parsedGif.lsd.width
+  const sourceHeight = parsedGif.lsd.height
+  const frames = decompressFrames(parsedGif, true)
+  return frames.map((frame) => {
+    const frameCanvas = document.createElement("canvas")
+    frameCanvas.width = width
+    frameCanvas.height = height
+    const frameContext = frameCanvas.getContext("2d")
+    if (!frameContext) return { canvas: frameCanvas, delay: frame.delay || 100 }
+
+    const patchCanvas = document.createElement("canvas")
+    patchCanvas.width = frame.dims.width
+    patchCanvas.height = frame.dims.height
+    const patchContext = patchCanvas.getContext("2d")
+    if (patchContext) {
+      patchContext.putImageData(new ImageData(frame.patch, frame.dims.width, frame.dims.height), 0, 0)
+      frameContext.drawImage(
+        patchCanvas,
+        (frame.dims.left / sourceWidth) * width,
+        (frame.dims.top / sourceHeight) * height,
+        (frame.dims.width / sourceWidth) * width,
+        (frame.dims.height / sourceHeight) * height,
+      )
+    }
+    return { canvas: frameCanvas, delay: Math.max(frame.delay || 100, 20) }
+  })
+}
+
+async function imageToCanvas(src: string, width: number, height: number) {
+  const canvas = document.createElement("canvas")
+  canvas.width = width
+  canvas.height = height
+  await new Promise<void>((resolve) => {
+    const image = new Image()
+    image.onload = () => {
+      canvas.getContext("2d")?.drawImage(image, 0, 0, width, height)
+      resolve()
+    }
+    image.onerror = () => resolve()
+    image.src = src
+  })
+  return canvas
+}
+
+async function composeGifDataUrl(
+  combination: Array<{ layerId: string; imageId: string; preview: string }>,
+  layers: Layer[],
+  width: number,
+  height: number,
+) {
+  const decodedLayers = await Promise.all(
+    combination.map((item) => {
+      const layer = layers.find((candidate) => candidate.id === item.layerId)
+      const image = layer?.images.find((candidate) => candidate.id === item.imageId)
+      return image ? decodeLayerFrames(image, width, height) : Promise.resolve([])
+    }),
+  )
+  const frameCount = Math.max(...decodedLayers.map((frames) => frames.length), 1)
+  const encoder = GIFEncoder()
+
+  for (let frameIndex = 0; frameIndex < frameCount; frameIndex += 1) {
+    const canvas = document.createElement("canvas")
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext("2d")
+    if (!context) continue
+    context.fillStyle = "#6A3CFF"
+    context.fillRect(0, 0, width, height)
+    let delay = 100
+
+    decodedLayers.forEach((frames) => {
+      const frame = frames[frameIndex % frames.length]
+      if (frame) {
+        context.drawImage(frame.canvas, 0, 0, width, height)
+        delay = Math.max(delay, frame.delay)
+      }
+    })
+
+    const imageData = context.getImageData(0, 0, width, height)
+    const palette = quantize(imageData.data, 256)
+    encoder.writeFrame(applyPalette(imageData.data, palette), width, height, { palette, delay })
+  }
+
+  encoder.finish()
+  return gifBytesToDataUrl(encoder.bytes())
 }
 
 export function CanvasPreview({
@@ -288,7 +376,9 @@ export function CanvasPreview({
 
         results.push({
           id: i,
-          dataUrl: outputFormat === "gif" ? canvasToGifDataUrl(tempCanvas) : tempCanvas.toDataURL("image/png", 1.0),
+          dataUrl: outputFormat === "gif"
+            ? await composeGifDataUrl(combination, layers, canvasSize.width, canvasSize.height)
+            : tempCanvas.toDataURL("image/png", 1.0),
           metadata,
           format: outputFormat,
         })
