@@ -73,7 +73,7 @@ async function decodeLayerFrames(image: Layer["images"][number], width: number, 
     frameCanvas.width = width
     frameCanvas.height = height
     const frameContext = frameCanvas.getContext("2d")
-    if (!frameContext) return { canvas: frameCanvas, delay: frame.delay || 100 }
+    if (!frameContext) return { canvas: frameCanvas, delay: (frame.delay || 10) * 10 }
 
     const patchCanvas = document.createElement("canvas")
     patchCanvas.width = frame.dims.width
@@ -89,7 +89,7 @@ async function decodeLayerFrames(image: Layer["images"][number], width: number, 
         (frame.dims.height / sourceHeight) * height,
       )
     }
-    return { canvas: frameCanvas, delay: frame.delay || 100 }
+    return { canvas: frameCanvas, delay: (frame.delay || 10) * 10 }
   })
 }
 
