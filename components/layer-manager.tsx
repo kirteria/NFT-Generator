@@ -129,7 +129,6 @@ function LayerItem({
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg,image/gif"
             multiple
             onChange={handleFileChange}
             className="hidden"
