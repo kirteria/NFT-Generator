@@ -126,7 +126,13 @@ function LayerItem({
         </div>
 
         <div>
-          <input ref={fileInputRef} type="file" multiple onChange={handleFileChange} className="hidden" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
+          />
           <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full border-2">
             <Upload className="w-4 h-4 mr-2" />
             Upload Images

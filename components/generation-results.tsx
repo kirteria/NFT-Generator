@@ -123,7 +123,7 @@ export function GenerationResults({
       const nft = editedResults[i]
       const response = await fetch(nft.dataUrl)
       const blob = await response.blob()
-      imageFolder.file(`${i + 1}.png`, blob)
+      imageFolder.file(`${i + 1}.${nft.format}`, blob)
     }
 
     const content = await zip.generateAsync({ type: "blob" })
